@@ -12,6 +12,8 @@ const handleDuplicateFieldsDB = (err, repeatedValue) => {
   // const valueError = err.errmsg.match(/(["'])(?:(?=(\\?))\2.)*?\1/);
   // console.log(valueError)
   // const message = `Duplicate field value: ${valueError[0]}`
+  console.log('///////////////////////')
+  console.log(repeatedValue)
   const message = `The name field already exists ${repeatedValue}`
 
   return new AppError(message, 400);
@@ -57,7 +59,6 @@ const sendErrorProd = (err, res) => {
 
 
 module.exports = (err, req, res, next) => {
-  console.log(req.body)
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
 
@@ -71,11 +72,14 @@ module.exports = (err, req, res, next) => {
       console.log(typeof err)
       if(error.status === 500 || error.kind === 'ObjectId') error = handleCastErrorDB(error)
       
-      if(error.code === 11000) error = handleDuplicateFieldsDB(error, req.body.name);
+      if(error.code === 11000) {
+
+        error = handleDuplicateFieldsDB(error, req.body.name);
+        
+      }
       
-      const checkForValidatorError = Object.keys(req.body);
-      console.log(checkForValidatorError[0])
-      if( error.errors[checkForValidatorError[0]].name === 'ValidatorError') error = handleValidationErrorDB (error, checkForValidatorError) 
+      const checkForValidatorError = Object.keys(req.body);     
+      if(error._message === "Validation failed" && error.errors[checkForValidatorError[0]].name && error.errors[checkForValidatorError[0]].name === 'ValidatorError') error = handleValidationErrorDB (error, checkForValidatorError) 
       sendErrorProd(error, res)
     }
 
