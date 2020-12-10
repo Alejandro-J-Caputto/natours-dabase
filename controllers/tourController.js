@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync')
 //SOME MIDDLEWARE
 exports.topFiveTours = (req, res, next) => {
   req.query.limit = 5;
@@ -57,8 +58,9 @@ exports.getTourByID = async (req, res) => {
     });
   }
 };
-exports.postTour = async (req, res) => {
-  try {
+
+exports.postTour = catchAsync(async (req, res, next) => {
+
     const newTour = await Tour.create(req.body);
     res.status(201).json({
       status: 'success',
@@ -66,13 +68,9 @@ exports.postTour = async (req, res) => {
         tour: newTour,
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+
+});
+
 exports.deleteTour = async (req, res) => {
   try {
     const delTour = await Tour.findByIdAndDelete(req.params.id);
