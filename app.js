@@ -14,10 +14,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 app.use(express.json()); // modifica la data que viene
 app.use(express.static(`${__dirname}/public`));
-app.use((req, res, next) => {
-  console.log('hello from the middleware');
-  next();
-});
+
+
+
+
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
   next();
@@ -26,6 +26,16 @@ app.use((req, res, next) => {
 // app.use(require('./routes/userRoutes'))// middleware para recoger las rutas centralizadas
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+//MANEJO DE RUTAS
+
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl}`
+  })
+})
+
 
 module.exports = app;
 
