@@ -1,6 +1,7 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
-const catchAsync = require('../utils/catchAsync')
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 //SOME MIDDLEWARE
 exports.topFiveTours = (req, res, next) => {
   req.query.limit = 5;
@@ -10,8 +11,8 @@ exports.topFiveTours = (req, res, next) => {
   next();
 };
 
-exports.getAllTours = async (req, res) => {
-  try {
+exports.getAllTours = catchAsync(async (req, res, next) => {
+
     // EXECUTE QUERY
     const features = new APIFeatures(Tour.find(), req.query)
       .filter()
@@ -33,35 +34,34 @@ exports.getAllTours = async (req, res) => {
         data: allTours,
       },
     });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
-exports.getTourByID = async (req, res) => {
-  try {
+});
+
+exports.getTourByID = catchAsync(async (req, res, next) => {
+
     const { id } = req.params;
     console.log(id);
+
     const oneTour = await Tour.findById(id);
+    if(!oneTour) {
+      return next(new AppError(`No tour found with that ID`, 404))
+    }
     res.status(200).json({
       status: 'success',
       data: {
         tour: oneTour,
       },
     });
-  } catch (err) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'No se ha encontrado el Tour',
-    });
-  }
-};
+
+});
 
 exports.postTour = catchAsync(async (req, res, next) => {
 
     const newTour = await Tour.create(req.body);
+
+    
+    if(!newTour) {
+      return next(new AppError(`No tour found with that ID`, 404))
+    }
     res.status(201).json({
       status: 'success',
       data: {
@@ -71,39 +71,49 @@ exports.postTour = catchAsync(async (req, res, next) => {
 
 });
 
-exports.deleteTour = async (req, res) => {
-  try {
+exports.deleteTour = catchAsync(async (req, res, next) => {
+
+
     const delTour = await Tour.findByIdAndDelete(req.params.id);
+    if(!delTour){
+      return next(new AppError('Not able to delete', 404))
+    }
     res.status(200).json({
       status: 'success',
       tour: delTour,
     });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      tour: err,
-    });
-  }
-};
-exports.editTour = async (req, res) => {
+
+    // res.status(400).json({
+    //   status: 'fail',
+    //   tour: err,
+    // });
+
+}) ;
+exports.editTour = async (req, res, next) => {
   console.log('works');
 };
-exports.patchTour = async (req, res) => {
+
+exports.patchTour = catchAsync(async (req, res, next) => {
   const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
   });
+
+  if(!updatedTour) {
+    return next(new AppError(`No tour found with that ID`, 404))
+  }
+
   res.status(200).json({
     status: 'success',
     updated: updatedTour,
   });
-};
-exports.checkBodyTour = (req, res) => {
+}) ;
+exports.checkBodyTour = (req, res, next) => {
   console.log('works');
 };
 
-exports.getTourStats = async (req, res) => {
-  try {
+exports.getTourStats = catchAsync(async (req, res, next) => {
+
     const stats = await Tour.aggregate([
       {
         $match: { ratingsAverage: { $gte: 4.5 } },
@@ -132,16 +142,16 @@ exports.getTourStats = async (req, res) => {
         stats,
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
 
-exports.getMonthlyPlan = async (req, res) => {
-  try {
+    // res.status(400).json({
+    //   status: 'fail',
+    //   message: err,
+    // });
+
+}) ;
+
+exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
+
     const year = req.params.year * 1;
     const plan = await Tour.aggregate([
       {
@@ -184,10 +194,10 @@ exports.getMonthlyPlan = async (req, res) => {
         plan,
       },
     });
-  } catch (err) {
-    res.status(400).json({
-      status: 'fail',
-      message: err,
-    });
-  }
-};
+
+    // res.status(400).json({
+    //   status: 'fail',
+    //   message: err,
+    // });
+
+}) ;
