@@ -1,4 +1,4 @@
-const { format } = require('morgan');
+
 const AppError = require('../utils/appError');
 
 const handleCastErrorDB = (err) => {
