@@ -12,12 +12,21 @@ const {
   // checkId,
 } = require('../controllers/tourController');
 // const app = express();
+const authController = require('../controllers/authController')
+
+
+
+
 const router = express.Router();
+
+
+
+
 // router.param('id', checkId);
+router.route('/').get(authController.protect, getAllTours).post(postTour);
 router.route('/top-five-tours').get(topFiveTours, getAllTours);
 router.route('/tour-stats').get(getTourStats);
 router.route('/monthly-plan/:year').get(getMonthlyPlan);
-router.route('/').get(getAllTours).post(postTour);
 router
   .route('/:id')
   .get(getTourByID)

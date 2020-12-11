@@ -25,6 +25,7 @@ app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.headers.authorization);
   next();
 });
 // app.use(require('./routes/tourRoutes'))// middleware para recoger las rutas centralizadas
