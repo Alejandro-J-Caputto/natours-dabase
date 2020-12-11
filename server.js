@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 //FALLBACK UNCAUGHT
+
 process.on('uncaughtException', err => {
   console.log(err.name, err.message);
   console.log('UNCAUGHT EXCEPTION');
