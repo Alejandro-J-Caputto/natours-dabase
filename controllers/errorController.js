@@ -1,6 +1,15 @@
 
 const AppError = require('../utils/appError');
 
+const handleTokenError = err => {
+  const message = err.message;
+  return new AppError(message + ' Please log in', 400);
+}
+const handleTokenExpired = err => {
+  const message = err.message;
+  return new AppError(message + ' Please log in again', 401)
+}
+
 const handleCastErrorDB = (err) => {
   console.log('/////////////////////////////')
   const message = `Invalid ${err.path}: ${err.value}.`
@@ -85,7 +94,9 @@ module.exports = (err, req, res, next) => {
         error = handleDuplicateFieldsDB(error, req.body.name);
         
       }
-      
+
+      if(error.name === "JsonWebTokenError") error = handleTokenError(error);
+      if(error.name === "TokenExpiredError") error = handleTokenExpired(error);
       const checkForValidatorError = Object.keys(req.body); 
       if(error._message === "User validation failed") {
 
