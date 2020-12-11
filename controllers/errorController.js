@@ -21,14 +21,22 @@ const handleDuplicateFieldsDB = (err, repeatedValue) => {
 }
 
 const handleValidationErrorDB = (error, body) => {
-  console.log(error.errors.ratingsAverage.properties.message)
 
+  console.log(error)
   const errors = body.map(el => error.errors[el].properties.message);
   console.log(errors)
 
   const message = 'Invalid input data.' + errors.join('. ');
   return new AppError(message, 400);
 }
+
+
+const handleValidationErrorUserDB = ( error, input ) => {
+   const errors = input.map(el => error.errors[el].properties.message);
+   const message = 'Invalid input data.' + errors.join('. ')
+   return new AppError(message, 400);
+}
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -78,7 +86,15 @@ module.exports = (err, req, res, next) => {
         
       }
       
-      const checkForValidatorError = Object.keys(req.body);     
+      const checkForValidatorError = Object.keys(req.body); 
+      if(error._message === "User validation failed") {
+
+        const propertieErrors = Object.keys(error.errors);
+        console.log(propertieErrors)
+
+        error = handleValidationErrorUserDB(error, propertieErrors);
+      }    
+
       if(error._message === "Validation failed" && error.errors[checkForValidatorError[0]].name && error.errors[checkForValidatorError[0]].name === 'ValidatorError') error = handleValidationErrorDB (error, checkForValidatorError) 
       sendErrorProd(error, res)
     }

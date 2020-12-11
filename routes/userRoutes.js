@@ -4,9 +4,15 @@ const {
   editUser,
   deleteUser,
 } = require('../controllers/userController');
+const { singUp} = require('../controllers/authController')
 const express = require('express');
+
 // const app = express();
 const router = express.Router();
+
+router.post('/signup', singUp);
+
+
 
 router.route('/').get(getUser).post(createUser);
 
