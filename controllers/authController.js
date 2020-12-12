@@ -85,6 +85,15 @@ exports.protect = catchAsync(async (req,res,next)=> {
         return next(new AppError('User recently changed password! Please log in aggin', 401));
     }
     //ACCESS CHECK 
-    req.user = freshUser; 
+    req.user = freshUser; // el usuario estara disponible por referencia en req.user en el siguiente midleware auth
     next();
 })
+
+exports.restrictTo = (...roles) => {
+    return (req, res, next) => {
+        if(!roles.includes(req.user.role)) {
+            return next( new AppError(' You dont have permissions', 403))
+        }
+        next();
+    }
+} 

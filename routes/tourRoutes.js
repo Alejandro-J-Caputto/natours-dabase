@@ -31,7 +31,7 @@ router
   .route('/:id')
   .get(getTourByID)
   .put(editTour)
-  .delete(deleteTour)
+  .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), deleteTour)
   .patch(patchTour);
 // app.use('/api/v1/tours', tourRouter) //nos llevamos este paso al app.js
 module.exports = router;
