@@ -3,6 +3,7 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/appError');
+const sendEmail = require('../utils/email');
 
 
 
@@ -107,9 +108,30 @@ exports.forgetPassword = catchAsync(async(req, res ,next) => {
 
     //2) Generate tje random reset token //metodo en el modelo 
     const resetToken = user.createPasswordResetToken();
-    await user.save({ validateBeforeSave: false });
+    await user.save({ validateBeforeSave: false }); //{ validateBeforeSave: false } para que no salten las validaciones que tienen el email y la password
 
     //3) Send it to user's email
+    const resetURL  = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+
+    const message = `Forgot your password? Submit a patch request eith your new password & passwordConfirm to the reset URL => ${resetURL}`
+    try {
+        await sendEmail ({
+        email: user.email,
+        subject: 'Your password reset token (valid for 10 min)',
+        message
+    })
+
+        res.status(200).json({
+        status: 'success',
+        message: 'Token sent to email'
+    })
+    } catch (err) {
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save({ validateBeforeSave: false }); //{ validateBeforeSave: false } para que no salten las validaciones que tienen el email y la password
+        return next(new AppError('There was an error sendint the email try again later'), 500);
+    }
+   
 }) 
 
 exports.resetPassword = (req, res, next) => {
