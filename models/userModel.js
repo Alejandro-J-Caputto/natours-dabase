@@ -45,10 +45,18 @@ const userSchema = new mongoose.Schema(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    active: {
+        type: Boolean,
+        default: true,
+        select: false
+    }
   }  
 );
-
-
+//DOCUMENT MIDDLEWARE
+userSchema.pre(/^find/, function(next) {
+    this.find({active: {$ne: false}});
+    next();
+});
 
 
 userSchema.pre('save', async function(next) {
@@ -60,7 +68,7 @@ userSchema.pre('save', async function(next) {
     this.passwordConfirm = undefined;
     next();
 })
-
+//////////////////////////////////////////////
 
 userSchema.methods.correctPassword = function(passToValidate, userPassword) {
     console.log('hola modelo')

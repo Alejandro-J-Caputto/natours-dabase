@@ -185,7 +185,7 @@ createAndSendToken(user, 200, res);
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
     // 1) get user 
-    console.log('hello world')
+
     // console.log(req.user.id  ,'patata')
     const user = await User.findById(req.user.id).select('+password');
     // console.log(user)
