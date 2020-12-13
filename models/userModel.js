@@ -49,6 +49,8 @@ const userSchema = new mongoose.Schema(
 );
 
 
+
+
 userSchema.pre('save', async function(next) {
 
     if(!this.isModified('password')) return next();
@@ -91,6 +93,14 @@ userSchema.methods.createPasswordResetToken = function() {
     return resetToken;
 
 }
+//Comprueba si no se trata de la creacion de un usuario o si la password es nueva
+// se creaa el campo passwordChagedAt
+userSchema.pre('save', function(next) {
+    if(!this.isModified('password') || this.isNew) return next();
+    this.passwordChangedAt = Date.now() - 1000;
+    next();
+})
+
 
 const User = mongoose.model('User', userSchema);
 

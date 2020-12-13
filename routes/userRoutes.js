@@ -4,7 +4,9 @@ const {
   editUser,
   deleteUser,
 } = require('../controllers/userController');
-const { singUp, login, forgetPassword, resetPassword} = require('../controllers/authController')
+const { singUp, login, forgetPassword, resetPassword, updatePassword, protect} = require('../controllers/authController')
+
+
 const express = require('express');
 
 // const app = express();
@@ -15,7 +17,8 @@ router.post('/login', login);
 
 router.post('/forgotPassword', forgetPassword);
 router.patch('/resetPassword/:token', resetPassword);
-
+//Resetear contraseña por deseo propio
+router.patch('/resetMyPassword',protect, updatePassword);
 
 router.route('/').get(getUser).post(createUser);
 
