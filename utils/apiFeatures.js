@@ -12,10 +12,18 @@ class APIFeatures {
     excludeFields.forEach((el) => delete queryObject[el]);
     // 1B) ADVANCE FILTERING
     let queryStr = JSON.stringify(queryObject);
-
+    
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    const parsedStr = JSON.parse(queryStr)
+    const searchedField = Object.keys(parsedStr)
+    const prueba = Object.values(parsedStr);
+    const regex = new RegExp(`${prueba[0]}`)
+    
+    if(searchedField.length === 0) {
+      return this;
+    }
 
-    this.query = this.query.find(JSON.parse(queryStr));
+  this.query = this.query.find({[searchedField[0]] : regex});
     return this;
     //
     // let query = Tour.find(JSON.parse(queryStr));
