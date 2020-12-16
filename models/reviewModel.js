@@ -17,36 +17,35 @@ const reviewSchema = new mongoose.Schema(
             type: Date,
             default: Date.now()
         },
-        tour: [
+        tour: 
             {
                 type: mongoose.Schema.ObjectId,
-                ref: 'Tour'
+                ref: 'Tour',
+                required: [true, 'Review must belong to a tour']
+            
             }
-        ],
-        user: [
+        ,
+        user: 
             {
                 type: mongoose.Schema.ObjectId,
-                ref: 'User'
+                ref: 'User',
+                required: [true, 'Review must have an user']
             }
-        ],
+        ,
         
     },
     {
         toJSON: { virtuals: true },
         toObject: { virtuals: true },
-    }
+})
 
-)
-
-//Query Middleware to Populate users && tours
-
-// reviewSchema.pre(/^find/, function(next){
-//     this.populate()
-//     next()
-// })
-
-
+// Query Middleware to Populate users && tou
+reviewSchema.pre(/^find/, function(next){
+    this.populate('tour', 'name id -guides').populate('user', 'name email')
+    // this.populate('user', 'name email')
+    next()
+})
 
 const Review = mongoose.model('Review', reviewSchema);
+module.exports = Review;
 
-module.exports = Review

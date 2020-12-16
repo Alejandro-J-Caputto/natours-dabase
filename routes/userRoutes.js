@@ -5,7 +5,7 @@ const {
   deleteMe,
   updateMe,
 } = require('../controllers/userController');
-const { singUp, login, forgetPassword, resetPassword, updatePassword, protect} = require('../controllers/authController')
+const { singUp, login, forgetPassword, resetPassword, updatePassword, protect, restrictTo} = require('../controllers/authController')
 
 
 const express = require('express');
@@ -24,7 +24,6 @@ router.route('/').get(getUser).post(createUser);
 // router.route('/:id').patch(editUser).delete(deleteMe);
 router.patch('/updateMe',protect, updateMe);
 router.delete('/deleteMe',protect, deleteMe);
-
 
 
 

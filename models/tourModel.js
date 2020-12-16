@@ -115,10 +115,21 @@ const tourSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   }
 );
+// tourSchema.set('toJSON', {virtuals: true})
+// tourSchema.set('toObject', {virtuals: true})
 
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+
+tourSchema.virtual('reviews', {
+  ref: 'Review', 
+  foreignField: 'tour',
+  localField: '_id'
+});
+
+
+
 //DOCUMENT MIDDLEWARE runs before. save comands & .create()
 tourSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });

@@ -22,6 +22,10 @@ exports.getReview = catchAsync( async (req, res ,next) => {
 
 exports.createReview = catchAsync( async (req, res, next) => {
 
+    //allow nested routes
+    if(!req.body.tour) req.body.tour = req.params.tourId;
+    if(!req.body.user) req.body.user = req.user.id;
+    ///////
     const newReview = await Review.create(req.body);
     if(!newReview) {
         return next(new AppError('There was a problem with the operation', 400));
