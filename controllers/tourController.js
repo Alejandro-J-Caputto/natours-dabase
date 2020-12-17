@@ -2,7 +2,8 @@ const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const { count } = require('../models/tourModel');
+const factory = require('./handler-factory');
+
 //SOME MIDDLEWARE
 exports.topFiveTours = (req, res, next) => {
   req.query.limit = 5;
@@ -73,24 +74,26 @@ exports.postTour = catchAsync(async (req, res, next) => {
 
 });
 
-exports.deleteTour = catchAsync(async (req, res, next) => {
+exports.deleteTour = factory.deleteOne(Tour);
+
+// exports.deleteTour = catchAsync(async (req, res, next) => {
 
 
-    const delTour = await Tour.findByIdAndDelete(req.params.id);
-    if(!delTour){
-      return next(new AppError('Not able to delete', 404))
-    }
-    res.status(200).json({
-      status: 'success',
-      tour: delTour,
-    });
+//     const delTour = await Tour.findByIdAndDelete(req.params.id);
+//     if(!delTour){
+//       return next(new AppError('Not able to delete', 404))
+//     }
+//     res.status(200).json({
+//       status: 'success',
+//       tour: delTour,
+//     });
 
-    // res.status(400).json({
-    //   status: 'fail',
-    //   tour: err,
-    // });
+//     // res.status(400).json({
+//     //   status: 'fail',
+//     //   tour: err,
+//     // });
 
-}) ;
+// }) ;
 exports.editTour = async (req, res, next) => {
   console.log('works');
 };
