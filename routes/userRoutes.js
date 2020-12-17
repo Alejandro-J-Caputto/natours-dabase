@@ -5,6 +5,9 @@ const {
   deleteMe,
   updateMe,
   deleteUser,
+  patchUser,
+  getAllUsers,
+  getUserById
 
 } = require('../controllers/userController');
 const { singUp, login, forgetPassword, resetPassword, updatePassword, protect, restrictTo} = require('../controllers/authController')
@@ -22,12 +25,13 @@ router.post('/forgotPassword', forgetPassword);
 router.patch('/resetPassword/:token', resetPassword);
 router.patch('/resetMyPassword',protect, updatePassword);
 //NORMAL USER FUNCIONALITIES
-router.route('/').get(getUser).post(createUser);
+router.route('/').get(getAllUsers).post(createUser);
 // router.route('/:id').patch(editUser).delete(deleteMe);
 router.patch('/updateMe',protect, updateMe);
 router.delete('/deleteMe',protect, deleteMe);
+router.patch('/:id',protect, patchUser);
 router.delete('/:id', deleteUser);
-
+router.get('/:id', getUserById)
 
 
 // app.use('/api/v1/users', userRouter) // nos llevamos este paso al app.js

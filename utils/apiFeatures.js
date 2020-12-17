@@ -16,14 +16,24 @@ class APIFeatures {
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     const parsedStr = JSON.parse(queryStr)
     const searchedField = Object.keys(parsedStr)
-    const prueba = Object.values(parsedStr);
-    const regex = new RegExp(`${prueba[0]}`)
     
+    let prueba = Object.values(parsedStr);
+    
+    const numerosValidos = ['1','2','3','4','5'];
+
+    if(numerosValidos.includes(prueba[0])) {
+      const numero = prueba[0];
+      console.log(numero)
+      this.query = this.query.find({[searchedField[0]] : numero});
+      return this
+    }
+
+    let regex = new RegExp(`${prueba[0]}`)
+
     if(searchedField.length === 0) {
       return this;
     }
-
-  this.query = this.query.find({[searchedField[0]] : regex});
+    this.query = this.query.find({[searchedField[0]] : regex});
     return this;
     //
     // let query = Tour.find(JSON.parse(queryStr));

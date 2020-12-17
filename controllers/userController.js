@@ -16,16 +16,23 @@ const filterObj = (body, ...fields) => {
     return newObj
 }
 
-exports.getUser = catchAsync(async (req, res, next) => {
-    const users = await User.find({})
+// exports.getUser = catchAsync(async (req, res, next) => {
+//     const users = await User.find({})
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            users
-        }
-    })
-});
+//     res.status(200).json({
+//         status: 'success',
+//         data: {
+//             users
+//         }
+//     })
+// });
+exports.getAllUsers = factory.getAll(User);
+exports.getUserById = factory.getOne(User);
+
+// FOR ADMINS 
+exports.deleteUser = factory.deleteOne(User);
+// FOR ADMINS NO USAR PARA ACTUALIZAR PASSWORDS
+exports.patchUser = factory.updateOne(User);
 
 exports.updateMe = catchAsync(async (req, res, next) => {
     const filteredBody = filterObj(req.body, 'name', 'email');
@@ -62,5 +69,3 @@ exports.deleteMe = catchAsync( async (req, res, next) => {
     })
 }) 
 
-
-exports.deleteUser = factory.deleteOne(User);
