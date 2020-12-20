@@ -30,20 +30,25 @@ const router = express.Router();
 router.use('/:tourId/reviews', reviewRouter);
 
 
-
+/////////////////////
 
 
 // router.param('id', checkId);
-router.route('/').get(authController.protect, getAllTours).post(postTour);
-router.route('/top-five-tours').get(topFiveTours, getAllTours);
-router.route('/tour-stats').get(getTourStats);
-router.route('/monthly-plan/:year').get(getMonthlyPlan);
+router.route('/')
+  .get(getAllTours)
+  .post(authController.protect, postTour);
+router.route('/top-five-tours')
+  .get(topFiveTours);
+router.route('/tour-stats')
+  .get(getTourStats);
+router.route('/monthly-plan/:year')
+  .get(authController.protect, authController.restrictTo('admin', 'lead-guide', 'guide'), getMonthlyPlan);
 router
   .route('/:id')
-  .get(getTourByID)
-  .put(editTour)
-  .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), deleteTour)
-  .patch(patchTour);
+    .get(getTourByID)
+    .put(editTour)
+    .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), deleteTour)
+    .patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), patchTour);
   
   
 

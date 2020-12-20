@@ -23,15 +23,17 @@ router.post('/signup', singUp);
 router.post('/login', login);
 router.post('/forgotPassword', forgetPassword);
 router.patch('/resetPassword/:token', resetPassword);
+
+//////
 router.patch('/resetMyPassword',protect, updatePassword);
 //NORMAL USER FUNCIONALITIES
-router.route('/').get(getAllUsers).post(createUser);
+router.route('/').get(protect, restrictTo('admin'), getAllUsers).post(createUser);
 // router.route('/:id').patch(editUser).delete(deleteMe);
 router.patch('/updateMe',protect, updateMe);
 router.delete('/deleteMe',protect, deleteMe);
 router.patch('/:id',protect, patchUser);
-router.delete('/:id', deleteUser);
-router.get('/:id', getUserById)
+router.delete('/:id',protect, deleteUser);
+router.get('/:id',protect, getUserById)
 
 
 // app.use('/api/v1/users', userRouter) // nos llevamos este paso al app.js

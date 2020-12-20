@@ -6,16 +6,19 @@ const { getOne } = require('../controllers/handler-factory');
 
 const router = express.Router({mergeParams: true});
 
+router.use(authController.protect);
 
 
 router.route('/')
     .get(getReview)
-    .post(authController.protect, authController.restrictTo('user'), setTourUserId ,createReview)
+    .post(authController.restrictTo('user'), setTourUserId ,createReview)
 
 router.route('/:id')
-    .delete(deleteReview)
-    .patch(patchReview)
-    .get(getOne);
+    .delete(authController.restrictTo('user', 'admin'),deleteReview)
+    .patch(authController.restrictTo('user', 'admin'), patchReview)
+    .get( getOne);
 
 
 module.exports = router
+
+

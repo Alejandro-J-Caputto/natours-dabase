@@ -14,29 +14,31 @@ class APIFeatures {
     let queryStr = JSON.stringify(queryObject);
     
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-    const parsedStr = JSON.parse(queryStr)
-    const searchedField = Object.keys(parsedStr)
+    // const parsedStr = JSON.parse(queryStr)
+    // const searchedField = Object.keys(parsedStr)
     
-    let prueba = Object.values(parsedStr);
+    // let prueba = Object.values(parsedStr);
     
-    const numerosValidos = ['1','2','3','4','5'];
+    // const numerosValidos = ['1','2','3','4','5'];
 
-    if(numerosValidos.includes(prueba[0])) {
-      const numero = prueba[0];
-      console.log(numero)
-      this.query = this.query.find({[searchedField[0]] : numero});
-      return this
-    }
+    // if(numerosValidos.includes(prueba[0])) {
+    //   const numero = prueba[0];
+    //   console.log(numero)
+    //   this.query = this.query.find({[searchedField[0]] : numero});
+    //   return this
+    // }
 
-    let regex = new RegExp(`${prueba[0]}`)
-
-    if(searchedField.length === 0) {
-      return this;
-    }
-    this.query = this.query.find({[searchedField[0]] : regex});
-    return this;
+    // let regex = new RegExp(`${prueba[0]}`)
+    // console.log(regex)
+    // if(searchedField.length === 0) {
+    //   return this;
+    // }
+    // this.query = this.query.find({[searchedField[0]] : regex});
     //
+    // console.log(queryStr)
+    this.query = this.query.find(JSON.parse(queryStr));
     // let query = Tour.find(JSON.parse(queryStr));
+    return this;
   }
 
   sort() {
