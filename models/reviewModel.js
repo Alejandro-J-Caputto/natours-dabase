@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const Tour = require('./tourModel');
 const validator = require('validator');
 
 
@@ -62,15 +63,45 @@ reviewSchema.statics.calcAverageRatings = async function (tourId) {
   ]);
   
   console.log(stats);
+if(stats.length > 0) {
+
+    await Tour.findByIdAndUpdate(tourId, {
+        ratingsQuantity: stats[0].nRating,
+        ratingsAverage: stats[0].avgRating
+    })
+} else {
+    await Tour.findByIdAndUpdate(tourId, {
+        ratingsQuantity: 0,
+        ratingsAverage: 4.5
+    })
+}
 
 }
 
+//AVOID DUPLICATE REVIEW////////////////////////////////
+reviewSchema.index({tour:1, user: 1}, { unique: true });
+////////////////////////////////////////////////////////
 
-reviewSchema.pre('save', function(next) {
+
+reviewSchema.post('save', function() {
 
     this.constructor.calcAverageRatings(this.tour)
+
+})
+
+
+//FINDBYIDANDUPDATE && FINDBYIDANDDELETE REVIEW RATING 
+
+reviewSchema.pre(/^findOneAnd/, async function(next){
+    this.reviewTemp = await this.findOne();
+    console.log(this.reviewTemp);
     next();
 })
+reviewSchema.post(/^findOneAnd/, async function(){
+    await this.reviewTemp.calcAverageRatings(this.reviewTemp.tour);
+})
+
+////////////////////////////////////////////////////////////////////
 
 const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;

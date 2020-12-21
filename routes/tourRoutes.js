@@ -9,6 +9,8 @@ const {
   topFiveTours,
   getTourStats,
   getMonthlyPlan,
+  getToursWithinRadius,
+  getDistances
   // checkId,
 } = require('../controllers/tourController');
 const reviewRouter = require('./reviewRoutes');
@@ -51,6 +53,14 @@ router
     .patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), patchTour);
   
   
+//GEOAGREAGATION
+
+router.route('/tours-within/:distance/center/:latlng/unit/:unit')
+  .get(getToursWithinRadius);
+
+
+
+router.route('/distances/:latlng/unit/:unit').get(getDistances);
 
 
 
