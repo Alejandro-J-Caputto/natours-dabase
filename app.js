@@ -71,10 +71,13 @@ app.use((req, res, next) => {
 // app.use(require('./routes/tourRoutes'))// middleware para recoger las rutas centralizadas
 // app.use(require('./routes/userRoutes'))// middleware para recoger las rutas centralizadas
 
-//ROUTES VIEWS
+//ROUTES VIEWS FOR PUG ENGINE 
 
 app.get('/', (req,res) => {
-  res.status(200).render('base');
+  res.status(200).render('base', {
+    tour: 'The Forest Hiker',
+    user: 'Alejandro'
+  });
 })
 
 
