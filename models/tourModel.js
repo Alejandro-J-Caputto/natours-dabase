@@ -178,7 +178,7 @@ tourSchema.post(/^find/, function(docs, next){
 })
 
 tourSchema.pre(/^find/, function(next) {
-  this.populate('guides', 'name role email')
+  this.populate('guides', 'name role email photo')
   next()
 })
 

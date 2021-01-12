@@ -42,7 +42,7 @@ const reviewSchema = new mongoose.Schema(
 
 // Query Middleware to Populate users && tou
 reviewSchema.pre(/^find/, function(next){
-    this.populate('tour', 'name id -guides').populate('user', 'name email')
+    this.populate('tour', 'name id -guides').populate('user', 'name email photo')
     // this.populate('user', 'name email')
     next()
 })
