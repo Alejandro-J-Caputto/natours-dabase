@@ -10,7 +10,7 @@ const {
   getUserById
 
 } = require('../controllers/userController');
-const { singUp, login, forgetPassword, resetPassword, updatePassword, protect, restrictTo} = require('../controllers/authController')
+const { singUp, login,logOut, forgetPassword, resetPassword, updatePassword, protect, restrictTo} = require('../controllers/authController')
 
 
 const express = require('express');
@@ -19,6 +19,7 @@ const express = require('express');
 const router = express.Router();
 
 //AUTHORIZATION
+router.get('/logout', logOut);
 router.post('/signup', singUp);
 router.post('/login', login);
 router.post('/forgotPassword', forgetPassword);

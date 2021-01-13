@@ -12,7 +12,7 @@ const createAndSendToken= (user, statusCode, res) => {
         expires: new Date(Date.now()
         + process.env.JWT_COOKIE_EXPIRES_IN
         * 24 * 60 * 60 * 1000),
-        httpOnly: true
+        httpOnly: true //seguridad para que no se pueda manipular
     }
     if(process.env.NODE_ENV === 'production') cookieOptions.secure = true;
     res.cookie('jwt-cookie', token, cookieOptions)
@@ -87,7 +87,15 @@ exports.login = catchAsync(async (req, res, next) => {
     // })
 }); 
 
-
+exports.logOut = (req, res) => {
+    res.cookie('jwt-cookie', 'loggedOut', {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.status(200).json({
+        status: 'success'
+    })
+}
 
 exports.protect = catchAsync(async (req,res,next)=> {
 
@@ -122,26 +130,31 @@ exports.protect = catchAsync(async (req,res,next)=> {
 })
 
 // ONLY FOR VIEW RENDER PAGES
-exports.isLoggedIn = catchAsync(async (req,res,next)=> {
-    if (req.cookies['jwt-cookie']) {
-        const decodedData = await promisify(jwt.verify)(req.cookies['jwt-cookie'],
-        process.env.JWT_SECRET);
-        //    console.log(decodedData);  
-        //3) Check if user still exists
-        const freshUser = await User.findById(decodedData.id);
-        if(!freshUser) {
-            return next()
-        }
-        //4) Check if user chagend password after the token was issued
-        if(freshUser.changedPasswordAfter(decodedData.iat)) {
+exports.isLoggedIn = async (req,res,next)=> {
+    try {
+        if (req.cookies['jwt-cookie']) {
+            const decodedData = await promisify(jwt.verify)(req.cookies['jwt-cookie'],
+            process.env.JWT_SECRET);
+            //    console.log(decodedData);  
+            //3) Check if user still exists
+            const freshUser = await User.findById(decodedData.id);
+            if(!freshUser) {
+                return next()
+            }
+            //4) Check if user chagend password after the token was issued
+            if(freshUser.changedPasswordAfter(decodedData.iat)) {
+                return next();
+            }
+            //THERE IS A LOGGED IN USER
+            res.locals.user = freshUser
             return next();
         }
-        //THERE IS A LOGGED IN USER
-        res.locals.user = freshUser
+    } catch {
         return next();
     }
+  
     next();
-})
+}
 
 exports.restrictTo = (...roles) => {
     return (req, res, next) => {
