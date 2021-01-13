@@ -46,31 +46,54 @@ const handleValidationErrorUserDB = ( error, input ) => {
    return new AppError(message, 400);
 }
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
+const sendErrorDev = (err,req, res) => {
+  if(req.originalUrl.startsWith('/api')) {
+      res.status(err.statusCode).json({
     status: err.status,
     error: {...err},
     message: err.message,
     stack: err.stack,
   })
+  } else {
+    res.status(err.statusCode).render('error', {
+      title: 'Something went wrong',
+      msg: err.message
+    })
+  }
+
 }
-const sendErrorProd = (err, res) => {
+const sendErrorProd = (err,req, res) => {
   //Operational error
+  if(req.originalUrl.startsWith('/api')) {
   if(err.isOperational){
-    res.status(err.statusCode).json({
+   return res.status(err.statusCode).json({
       status: err.status,
       message: err.message
     })
   } else {
     //Programming or other errors. 
     console.error('ERROR', err);
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
       message: 'Something went wrong'
     })
 
   }
-
+  } else {
+    if(err.isOperational){
+     return res.status(err.statusCode).render('error', {
+        title: 'Something went wrong',
+        msg: err.message
+      })
+    } else {
+      //Programming or other errors. 
+     return res.status(err.statusCode).render('error', {
+        title: 'Something went wrong',
+        msg: 'Please try again later'
+      })
+  
+    }
+  }
 }
 
 
@@ -80,12 +103,12 @@ module.exports = (err, req, res, next) => {
     err.status = err.status || 'error';
 
     if(process.env.NODE_ENV === 'development'){
-     sendErrorDev(err, res);
+     sendErrorDev(err,req, res);
     
 
     } else if (process.env.NODE_ENV === 'production'){
       let error = {...err};
-  
+      error.message = err.message
       console.log(typeof err)
       if(error.status === 500 || error.kind === 'ObjectId') error = handleCastErrorDB(error)
       
@@ -107,7 +130,7 @@ module.exports = (err, req, res, next) => {
       }    
 
       if(error._message === "Validation failed" && error.errors[checkForValidatorError[0]].name && error.errors[checkForValidatorError[0]].name === 'ValidatorError') error = handleValidationErrorDB (error, checkForValidatorError) 
-      sendErrorProd(error, res)
+      sendErrorProd(error,req, res)
     }
 
   

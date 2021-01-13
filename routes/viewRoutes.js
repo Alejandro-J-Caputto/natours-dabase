@@ -4,15 +4,15 @@ const authController = require('../controllers/authController')
 const router = express.Router();
 
 //ROUTES VIEWS FOR PUG ENGINE 
-  router.use(authController.isLoggedIn);
+  // router.use(authController.isLoggedIn);
 
-  router.get('/', viewController.getOverview)
+  router.get('/',authController.isLoggedIn, viewController.getOverview)
   
-  router.get('/tour/:slug', viewController.getDetails)
+  router.get('/tour/:slug',authController.isLoggedIn, viewController.getDetails)
 
   //LOGIN ROUTE
-  router.get('/login', viewController.loginUser)
+  router.get('/login',authController.isLoggedIn, viewController.loginUser)
 
   //ACCOUNT
-  // router.get('/me', authController.protect, viewController.getAccount)
+  router.get('/me', authController.protect, viewController.getAccount)
 module.exports = router;
