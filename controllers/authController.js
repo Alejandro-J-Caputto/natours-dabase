@@ -96,6 +96,8 @@ exports.protect = catchAsync(async (req,res,next)=> {
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')){
         const tokenHeader = req.headers.authorization;
         token = tokenHeader.split(' ')[1];
+    } else if (req.cookies['jwt-cookie']) {
+        token = req.cookies['jwt-cookie']
     }
     if(!token) {
         return next(new AppError('Your are not logged in! Please logged in to get access', 401))
@@ -115,6 +117,29 @@ exports.protect = catchAsync(async (req,res,next)=> {
     //ACCESS CHECK 
     req.user = freshUser; // el usuario estara disponible por referencia en req.user en el siguiente midleware auth
     // console.log(req.user, 'patata')
+    res.locals.user = freshUser
+    next();
+})
+
+// ONLY FOR VIEW RENDER PAGES
+exports.isLoggedIn = catchAsync(async (req,res,next)=> {
+    if (req.cookies['jwt-cookie']) {
+        const decodedData = await promisify(jwt.verify)(req.cookies['jwt-cookie'],
+        process.env.JWT_SECRET);
+        //    console.log(decodedData);  
+        //3) Check if user still exists
+        const freshUser = await User.findById(decodedData.id);
+        if(!freshUser) {
+            return next()
+        }
+        //4) Check if user chagend password after the token was issued
+        if(freshUser.changedPasswordAfter(decodedData.iat)) {
+            return next();
+        }
+        //THERE IS A LOGGED IN USER
+        res.locals.user = freshUser
+        return next();
+    }
     next();
 })
 
