@@ -7,13 +7,18 @@ const {
   deleteUser,
   patchUser,
   getAllUsers,
-  getUserById
+  getUserById,
+  uploadUserPhoto,
+  resizeUserPhoto
+
 
 } = require('../controllers/userController');
 const { singUp, login,logOut, forgetPassword, resetPassword, updatePassword, protect, restrictTo} = require('../controllers/authController')
 
 
 const express = require('express');
+
+
 
 // const app = express();
 const router = express.Router();
@@ -30,7 +35,7 @@ router.patch('/resetMyPassword',protect, updatePassword);
 //NORMAL USER FUNCIONALITIES
 router.route('/').get(protect, restrictTo('admin'), getAllUsers).post(createUser);
 // router.route('/:id').patch(editUser).delete(deleteMe);
-router.patch('/updateMe',protect, updateMe);
+router.patch('/updateMe',protect, uploadUserPhoto, resizeUserPhoto, updateMe);
 router.delete('/deleteMe',protect, deleteMe);
 router.patch('/:id',protect, patchUser);
 router.delete('/:id',protect, deleteUser);

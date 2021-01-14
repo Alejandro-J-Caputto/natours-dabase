@@ -2,11 +2,54 @@
 
 // const users = JSON.parse(fs.readFileSync(`${__dirname}/../dev-data/data/users.json`));
 
+const multer = require('multer');
+const sharp = require('sharp');
 const User = require('../models/userModel');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handler-factory');
 
+// const multerStorage = multer.diskStorage({
+//     destination: (req, file, callbackFunctionAsNext) => {
+//         callbackFunctionAsNext(null, 'public/img/users');
+//     },
+//     filename: (req, file, callbackFunctionAsNext) => {
+//         //user-id-timestamp.jpg
+//         const ext = file.mimetype.split('/')[1];
+//         callbackFunctionAsNext(null, `user-${req.user.id}-${Date.now()}.${ext}`);
+//     }
+// });
+const multerStorage = multer.memoryStorage(); // esta almacenada en el buffer
+const multerFilter = (req, file, callbackFunctionAsNext) => {
+    if(file.mimetype.startsWith('image')) {
+        callbackFunctionAsNext(null, true);
+    } else {
+        callbackFunctionAsNext(new AppError('Not an image! Please upload image only.', 400), false)
+    }
+}
+
+const upload = multer(
+    {
+      storage: multerStorage,
+      fileFilter: multerFilter  
+    }
+);
+
+exports.uploadUserPhoto = upload.single('photo');
+
+exports.resizeUserPhoto = (req,res,next) => {
+    if ( !req.file) return next;
+
+    req.file.filename = `user-${req.user.id}-${Date.now()}.jpeg`;
+
+    sharp(req.file.buffer)
+    .resize(500, 500)
+    .toFormat('jpeg')
+    .jpeg({quality: 90})
+    .toFile(`public/img/users/${req.file.filename}`)
+
+    next();
+}
 
 const filterObj = (body, ...fields) => {
     const newObj = {}
@@ -35,7 +78,10 @@ exports.deleteUser = factory.deleteOne(User);
 exports.patchUser = factory.updateOne(User);
 
 exports.updateMe = catchAsync(async (req, res, next) => {
+    console.log(req.file);
+    console.log(req.body);
     const filteredBody = filterObj(req.body, 'name', 'email');
+    if(req.file) filteredBody.photo = req.file.filename;
     // 1) Create an error if he tries to update the password
     if( req.body.password || req.body.passwordConfirm) {
         return next( new AppError('You can not change the password from here, Please use the route useMyPassword', 400));
