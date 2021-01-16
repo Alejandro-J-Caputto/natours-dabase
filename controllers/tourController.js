@@ -1,4 +1,7 @@
 const Tour = require('../models/tourModel');
+
+const multer = require('multer');
+const sharp = require('sharp');
 // const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -20,6 +23,56 @@ exports.postTour = factory.createOne(Tour);
 exports.deleteTour = factory.deleteOne(Tour);
 exports.patchTour = factory.updateOne(Tour);
 
+
+const multerStorage = multer.memoryStorage(); // esta almacenada en el buffer
+const multerFilter = (req, file, callbackFunctionAsNext) => {
+    if(file.mimetype.startsWith('image')) {
+        callbackFunctionAsNext(null, true);
+    } else {
+        callbackFunctionAsNext(new AppError('Not an image! Please upload image only.', 400), false)
+    }
+}
+
+const upload = multer(
+    {
+      storage: multerStorage,
+      fileFilter: multerFilter  
+    }
+);
+
+exports.uploadTourImages = upload.fields([
+  {name: 'imageCover', maxCount: 1},
+  {name: 'images', maxCount: 3}
+])
+
+exports.resizeTourImages = async(req, res ,next) => {
+  console.log(req.files);
+  if(!req.files.imageCover || !req.files.images) return next();
+
+  const imageCoverFilename = `tour-${req.params.id}-${Date.now()}-cover.jpeg`
+  req.body.images = [];
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({quality: 90})
+    .toFile(`public/img/tours/${imageCoverFilename}`)
+  req.body.imageCover = imageCoverFilename;
+
+  await Promise.all(req.files.images.map(async (file, index) => {
+    const filename = `tour-${req.params.id}-${Date.now()}-${index + 1}.jpeg`
+
+    await sharp(file.buffer)
+      .resize(2000, 1333)
+      .toFormat('jpeg')
+      .jpeg({quality: 90})
+      .toFile(`public/img/tours/${filename}`)
+
+    req.body.images.push(filename);
+    })
+  );
+
+  next();
+}
 
 //GEOLOCATION
 exports.getToursWithinRadius = catchAsync(async (req, res, next) => {

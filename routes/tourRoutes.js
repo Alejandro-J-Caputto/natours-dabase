@@ -10,7 +10,9 @@ const {
   getTourStats,
   getMonthlyPlan,
   getToursWithinRadius,
-  getDistances
+  getDistances,
+  resizeTourImages,
+  uploadTourImages
   // checkId,
 } = require('../controllers/tourController');
 const reviewRouter = require('./reviewRoutes');
@@ -50,7 +52,7 @@ router
     .get(getTourByID)
     .put(editTour)
     .delete(authController.protect, authController.restrictTo('admin', 'lead-guide'), deleteTour)
-    .patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), patchTour);
+    .patch(authController.protect, authController.restrictTo('admin', 'lead-guide'), uploadTourImages, resizeTourImages, patchTour);
   
   
 //GEOAGREAGATION
